@@ -5,7 +5,7 @@ from PIL import Image
 import cv2 
 import requests
 
-DEFAULT_CONFIDENCE_THRESHOLD = 0.50
+DEFAULT_CONFIDENCE_THRESHOLD = 0.70
 confidence_threshold = DEFAULT_CONFIDENCE_THRESHOLD
 
 img = cv2.imread('/app/src/cam_image.jpg')
@@ -32,24 +32,25 @@ def classify(img, confidence_threshold):
     model.setInputScale(1.0/127.5)
     model.setInputMean((127.5,127.5,127.5))
     model.setInputSwapRB(True)
+    model.setInputCrop(False)
     img = cv2.imread('/app/src/cam_image.jpg')
     cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    ClassIndex, confidence, bbox = model.detect(img, confThreshold=confidence_threshold)
+    ClassIndex, confidence, bbox = model.detect(img, confThreshold=0.2)
     if len(ClassIndex) > 1:
         # draw detection boxes and labels
         font = cv2.FONT_HERSHEY_PLAIN
         for ClassInd, conf, boxes in zip(ClassIndex.flatten(), confidence.flatten(), bbox):
-            # append the object entry to our result table
-            results.append([class_labels()[ClassInd-1], conf])
-            cv2.rectangle(img, boxes, (255, 0, 0), 2)
-            cv2.putText(img, 
-                        class_labels()[ClassInd-1], 
-                        (boxes[0]+10, boxes[1]+40), 
-                        font, 
-                        fontScale=1.0, 
-                        color=(0,255,0))
+            if conf > confidence_threshold:
+                # append the object entry to our result table
+                results.append([class_labels()[ClassInd-1], conf])
+                cv2.rectangle(img, boxes, (255, 0, 0), 2)
+                cv2.putText(img, 
+                            class_labels()[ClassInd-1], 
+                            (boxes[0]+10, boxes[1]+40), 
+                            font, 
+                            fontScale=1.0, 
+                            color=(0,255,0))
     return results, img
-
 
 results = []
 

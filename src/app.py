@@ -11,12 +11,12 @@ confidence_threshold = DEFAULT_CONFIDENCE_THRESHOLD
 @st.cache
 def download_trained_model():
     # download and save model
-    r = requests.get('https://github.com/wolfgangB33r/camera-object-detection/blob/main/model/frozen_inference_graph.pb?raw=true')  
-    with open('frozen_inference_graph.pb', 'wb') as f:
+    r = requests.get('https://github.com/wolfgangB33r/camera-object-detection/blob/main/model/graph.pb?raw=true')  
+    with open('graph.pb', 'wb') as f:
         f.write(r.content)
     # download and save model config
-    r = requests.get('https://github.com/wolfgangB33r/camera-object-detection/blob/main/model/ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt?raw=true')  
-    with open('ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt', 'wb') as f:
+    r = requests.get('https://github.com/wolfgangB33r/camera-object-detection/blob/main/model/model_config.pbtxt?raw=true')  
+    with open('model_config.pbtxt', 'wb') as f:
         f.write(r.content)
     # download and save model lables file
     r = requests.get('https://github.com/wolfgangB33r/camera-object-detection/blob/main/model/labels.txt?raw=true')  
@@ -42,8 +42,8 @@ def class_label(classIndex):
 
 def classify(img, confidence_threshold):
     results = []
-    config_file = 'ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt'
-    frozen_model = 'frozen_inference_graph.pb'
+    config_file = 'model_config.pbtxt'
+    frozen_model = 'graph.pb'
     model = cv2.dnn_DetectionModel(frozen_model, config_file)
     model.setInputSize(320, 320)
     model.setInputScale(1.0/127.5)

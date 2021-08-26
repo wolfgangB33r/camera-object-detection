@@ -17,11 +17,11 @@ def download_cam_image(camera_url):
     file.close()
 
 @st.cache
-def class_labels():
+def class_label(classIndex):
     classLabels = [] 
     with open('/app/src/labels.txt', 'rt') as fpt:
         classLabels = fpt.read().rstrip('\n').split('\n')
-    return classLabels
+    return classLabels[classIndex-1]
 
 def classify(img, confidence_threshold):
     results = []
@@ -42,10 +42,10 @@ def classify(img, confidence_threshold):
         for ClassInd, conf, boxes in zip(ClassIndex.flatten(), confidence.flatten(), bbox):
             if conf > confidence_threshold:
                 # append the object entry to our result table
-                results.append([class_labels()[ClassInd-1], conf])
+                results.append([ClassInd, class_label(ClassInd), conf])
                 cv2.rectangle(img, boxes, (255, 0, 0), 2)
                 cv2.putText(img, 
-                            class_labels()[ClassInd-1], 
+                            class_label(ClassInd), 
                             (boxes[0]+10, boxes[1]+40), 
                             font, 
                             fontScale=1.0, 
@@ -56,9 +56,15 @@ results = []
 
 st.title('Camera Object Detection')
 
+url = st.text_input('Specify a Picture URL')
+if url is not None and url.startswith('http'):
+    download_cam_image(url)
+    img_file_buffer = None
+
 img_file_buffer = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
 if img_file_buffer is not None:
     with Image.open(img_file_buffer) as im:
+        url = ""
         rgb_im = im.convert('RGB')
         rgb_im.save('/app/src/cam_image.jpg')
         results = classify(img, confidence_threshold)
@@ -70,5 +76,5 @@ confidence_threshold = st.slider(
 results, img = classify(img, confidence_threshold)
 st.image(img)
 
-df = pd.DataFrame(results, columns=(['Object', 'Confidence']))
+df = pd.DataFrame(results, columns=(['Class', 'Label', 'Confidence']))
 st.dataframe(df)  

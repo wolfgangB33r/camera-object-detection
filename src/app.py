@@ -18,7 +18,7 @@ def download_cam_image(camera_url):
 
 @st.cache
 def class_labels():
-    classLabels = []
+    classLabels = [] 
     with open('/app/src/labels.txt', 'rt') as fpt:
         classLabels = fpt.read().rstrip('\n').split('\n')
     return classLabels

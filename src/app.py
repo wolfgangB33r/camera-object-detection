@@ -72,6 +72,8 @@ results = []
 
 st.title('Camera Object Detection')
 
+st.markdown('Source at [GitHub](https://github.com/wolfgangB33r/camera-object-detection), read the companion [blog](https://wolfgangb33r.medium.com/how-to-uplevel-your-security-cam-by-detecting-objects-with-a-streamlit-data-app-aa2cdfef391d).')
+
 url = st.text_input('Specify a Picture URL')
 if url is not None and url.startswith('http'):
     img = download_cam_image(url)

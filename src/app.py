@@ -8,13 +8,14 @@ import requests
 DEFAULT_CONFIDENCE_THRESHOLD = 0.70
 confidence_threshold = DEFAULT_CONFIDENCE_THRESHOLD
 
-img = cv2.imread('/app/src/cam_image.jpg')
 
-def download_cam_image(camera_url):
-    response = requests.get(camera_url)
-    file = open("/app/src/cam_image.jpg", "wb")
-    file.write(response.content)
-    file.close()
+def download_cam_image(picture_url):
+    resp = requests.get(picture_url, stream=True).raw
+    image = np.asarray(bytearray(resp.read()), dtype="uint8")
+    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    return image
+
+img = download_cam_image('https://github.com/wolfgangB33r/camera-object-detection/raw/main/images/cam_image.jpg')
 
 @st.cache
 def class_label(classIndex):
@@ -33,7 +34,6 @@ def classify(img, confidence_threshold):
     model.setInputMean((127.5,127.5,127.5))
     model.setInputSwapRB(True)
     model.setInputCrop(False)
-    img = cv2.imread('/app/src/cam_image.jpg')
     cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     ClassIndex, confidence, bbox = model.detect(img, confThreshold=0.2)
     if len(ClassIndex) > 1:
@@ -58,17 +58,15 @@ st.title('Camera Object Detection')
 
 url = st.text_input('Specify a Picture URL')
 if url is not None and url.startswith('http'):
-    download_cam_image(url)
+    img = download_cam_image(url)
     img_file_buffer = None
 
 img_file_buffer = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
 if img_file_buffer is not None:
-    with Image.open(img_file_buffer) as im:
-        url = ""
-        rgb_im = im.convert('RGB')
-        rgb_im.save('/app/src/cam_image.jpg')
-        results = classify(img, confidence_threshold)
-
+    image = Image.open(img_file_buffer)
+    img_array = np.asarray(image)
+    img = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+    
 confidence_threshold = st.slider(
     "Confidence threshold", 0.0, 1.0, DEFAULT_CONFIDENCE_THRESHOLD, 0.05
 )

@@ -8,6 +8,22 @@ import requests
 DEFAULT_CONFIDENCE_THRESHOLD = 0.70
 confidence_threshold = DEFAULT_CONFIDENCE_THRESHOLD
 
+@st.cache
+def download_trained_model():
+    # download and save model
+    r = requests.get('https://github.com/wolfgangB33r/camera-object-detection/blob/main/model/frozen_inference_graph.pb?raw=true')  
+    with open('frozen_inference_graph.pb', 'wb') as f:
+        f.write(r.content)
+    # download and save model config
+    r = requests.get('https://github.com/wolfgangB33r/camera-object-detection/blob/main/model/ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt?raw=true')  
+    with open('ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt', 'wb') as f:
+        f.write(r.content)
+    # download and save model lables file
+    r = requests.get('https://github.com/wolfgangB33r/camera-object-detection/blob/main/model/labels.txt?raw=true')  
+    with open('labels.txt', 'wb') as f:
+        f.write(r.content)
+
+download_trained_model()
 
 def download_cam_image(picture_url):
     resp = requests.get(picture_url, stream=True).raw
@@ -20,14 +36,14 @@ img = download_cam_image('https://github.com/wolfgangB33r/camera-object-detectio
 @st.cache
 def class_label(classIndex):
     classLabels = [] 
-    with open('/app/src/labels.txt', 'rt') as fpt:
+    with open('labels.txt', 'rt') as fpt:
         classLabels = fpt.read().rstrip('\n').split('\n')
     return classLabels[classIndex-1]
 
 def classify(img, confidence_threshold):
     results = []
-    config_file = '/app/src/ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt'
-    frozen_model = '/app/src/frozen_inference_graph.pb'
+    config_file = 'ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt'
+    frozen_model = 'frozen_inference_graph.pb'
     model = cv2.dnn_DetectionModel(frozen_model, config_file)
     model.setInputSize(320, 320)
     model.setInputScale(1.0/127.5)

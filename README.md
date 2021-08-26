@@ -1,6 +1,6 @@
 # Streamlit-based Camera Object Detection Data App
 
-A data app for detecting objects any given picture.
+A data app for detecting objects in any given picture. Either upload your own picture for detection or enter a URL referecing a web cam still image or any other Web picture.
 
 ## Pretrained model attributation
 

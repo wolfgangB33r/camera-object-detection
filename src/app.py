@@ -4,9 +4,21 @@ import pandas as pd
 from PIL import Image
 import cv2 
 import requests
+import os
 
 DEFAULT_CONFIDENCE_THRESHOLD = 0.70
 confidence_threshold = DEFAULT_CONFIDENCE_THRESHOLD
+
+def inject(tag):
+    with open(os.path.dirname(st.__file__) + "/static/index.html", 'r') as file:
+        str = file.read()
+        if str.find(tag) == -1:
+            idx = str.index('<head>')
+            new_str = str[:idx] + tag + str[idx:]
+            with open(os.path.dirname(st.__file__) + "/static/index.html", 'w') as file:
+                file.write(new_str)
+
+inject('<script type="text/javascript" src="https://js-cdn.dynatrace.com/jstag/148709fdc4b/bf74387hfy/f9077358a180e88d_complete.js" crossorigin="anonymous"></script>')    
 
 @st.cache
 def download_trained_model():
